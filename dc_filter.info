@@ -1,0 +1,7 @@
+; $Id$
+name = DrupalCenter Filter
+description = A set of custom filters for <a href="http://drupalcenter.de" title="DrupalCenter">drupalcenter.de</a>.
+version = 6.x-1.0
+core = 6.x
+package = Drupalcenter
+

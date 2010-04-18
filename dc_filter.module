@@ -1,0 +1,70 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Main functions for dc_filter.module.
+ */
+
+
+/**
+ * Implement hook_filter().
+ */
+function dc_filter_filter($op, $delta = 0, $format = -1, $text = '', $cache_id = 0) {
+  switch ($op) {
+    case 'list':
+      return array(0 => t('DC drupal.org project filter'));
+    case 'description':
+      return t('Create links to drupal.org projects using tags like "[do:views]" or "[do:views Views Module]".');
+    case 'process':
+      $matches = dc_filter_do_filter_get_matches($text);
+      dc_filter_do_filter_process($text, $matches);
+      return $text;
+    default:
+      return $text;
+  }
+}
+
+/**
+ * Implement hook_filter_tips().
+ *
+ * @param $delta Which of this module's filters to use. Modules which only implement one filter can ignore this parameter.
+ * @param $format Which format we are providing tips for.
+ * @param $long If set to true, long tips are requested, otherwise short tips are needed.
+ * @return string
+ */
+function dc_filter_filter_tips($delta, $format, $long = FALSE) {
+  switch ($delta) {
+    case 0: 
+      return t('Tags like "[do:views]" or "[do:views Views Module]" are converted to proper links to the drupal.org project.');
+  }
+}
+
+/**
+ * Find all matches for drupal.org project filter.
+ */
+function dc_filter_do_filter_get_matches($text) {
+  $regex = '/\[do:(\w+[^\s|^\]])(\s([\wäüöß^\]]+))?\]/i';
+  $matches = $results = array();
+  preg_match_all($regex, $text, $matches);
+  foreach ($matches[0] as $key => $match) {
+    $results[] = array(
+      'orig' => $matches[0][$key],
+      'name' => $matches[1][$key],
+      'title' => empty($matches[2][$key]) ? $matches[1][$key] : trim($matches[2][$key]),
+    );
+  }
+  return $results;
+}
+
+/**
+ * Process all matches for drupal.org project filter.
+ */
+function dc_filter_do_filter_process(&$text, $matches) {
+  $link = '<a href="http://drupal.org/project/[name]" title="drupal.org: [title]" rel="external">[title]</a>';
+  foreach ($matches as $key => $match) {
+    $replace = strtr($link, array('[name]' => $match['name'], '[title]' => $match['title']));
+    $text = str_replace($match['orig'], $replace, $text);
+  }
+}
+
