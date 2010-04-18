@@ -44,7 +44,7 @@ function dc_filter_filter_tips($delta, $format, $long = FALSE) {
  * Find all matches for drupal.org project filter.
  */
 function dc_filter_do_filter_get_matches($text) {
-  $regex = '/\[do:(\w+[^\s|^\]])(\s([\wäüöß^\]]+))?\]/i';
+  $regex = '/\[do:(\w+[^\s|^\]])(\s([\s\wäüöß^\]]+))?\]/i';
   $matches = $results = array();
   preg_match_all($regex, $text, $matches);
   foreach ($matches[0] as $key => $match) {
