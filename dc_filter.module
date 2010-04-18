@@ -13,13 +13,30 @@
 function dc_filter_filter($op, $delta = 0, $format = -1, $text = '', $cache_id = 0) {
   switch ($op) {
     case 'list':
-      return array(0 => t('DC drupal.org project filter'));
+      return array(
+        0 => t('DC drupal.org project filter'),
+        1 => t('DC api.drupal.org filter'),
+      );
     case 'description':
-      return t('Create links to drupal.org projects using tags like "[do:views]" or "[do:views Views Module]".');
+      switch ($delta) {
+        case 0:
+          return t('Create links to drupal.org projects using tags like "[do:views]" or "[do:views Views Module]".');
+        case 1:
+          return t('Create links to api.drupal.org using tags like "[api:hook_menu]" or "[api:hook_menu Menu-Hook]".');
+      }
     case 'process':
-      $matches = dc_filter_do_filter_get_matches($text);
-      dc_filter_do_filter_process($text, $matches);
-      return $text;
+      switch ($delta) {
+        case 0:
+          $matches = dc_filter_do_filter_get_matches($text);
+          dc_filter_do_filter_process($text, $matches);
+          return $text;
+        case 1:
+          $matches = dc_filter_api_filter_get_matches($text);
+          dc_filter_api_filter_process($text, $matches);
+          return $text;
+        default:
+          return $text;
+      }
     default:
       return $text;
   }
@@ -37,6 +54,8 @@ function dc_filter_filter_tips($delta, $format, $long = FALSE) {
   switch ($delta) {
     case 0: 
       return t('Tags like "[do:views]" or "[do:views Views Module]" are converted to proper links to the drupal.org project.');
+    case 1: 
+      return t('Tags like "[api:hook_menu]" or "[api:hook_menu Menu-Hook]" are converted to proper links to api.drupal.org.');
   }
 }
 
@@ -62,6 +81,34 @@ function dc_filter_do_filter_get_matches($text) {
  */
 function dc_filter_do_filter_process(&$text, $matches) {
   $link = '<a href="http://drupal.org/project/[name]" title="drupal.org: [title]" rel="external">[title]</a>';
+  foreach ($matches as $key => $match) {
+    $replace = strtr($link, array('[name]' => $match['name'], '[title]' => $match['title']));
+    $text = str_replace($match['orig'], $replace, $text);
+  }
+}
+
+/**
+ * Find all matches for drupal.org project filter.
+ */
+function dc_filter_api_filter_get_matches($text) {
+  $regex = '/\[api:(\w+[^\s|^\]])(\s([-\s\w\(\)äüöß^\]]+))?\]/i';
+  $matches = $results = array();
+  preg_match_all($regex, $text, $matches);
+  foreach ($matches[0] as $key => $match) {
+    $results[] = array(
+      'orig' => $matches[0][$key],
+      'name' => $matches[1][$key],
+      'title' => empty($matches[2][$key]) ? $matches[1][$key] .'()' : trim($matches[2][$key]),
+    );
+  }
+  return $results;
+}
+
+/**
+ * Process all matches for drupal.org project filter.
+ */
+function dc_filter_api_filter_process(&$text, $matches) {
+  $link = '<a href="http://api.drupal.org/[name]" title="api.drupal.org: [title]" rel="external">[title]</a>';
   foreach ($matches as $key => $match) {
     $replace = strtr($link, array('[name]' => $match['name'], '[title]' => $match['title']));
     $text = str_replace($match['orig'], $replace, $text);
