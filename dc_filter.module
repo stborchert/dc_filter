@@ -108,7 +108,7 @@ function dc_filter_api_filter_get_matches($text) {
  * Process all matches for drupal.org project filter.
  */
 function dc_filter_api_filter_process(&$text, $matches) {
-  $link = '<a href="http://api.drupal.org/[name]" title="api.drupal.org: [name]()" rel="external">[title]</a>';
+  $link = '<a href="http://api.drupal.org/api/function/[name]" title="api.drupal.org: [name]()" rel="external">[title]</a>';
   foreach ($matches as $key => $match) {
     $replace = strtr($link, array('[name]' => $match['name'], '[title]' => $match['title']));
     $text = str_replace($match['orig'], $replace, $text);
