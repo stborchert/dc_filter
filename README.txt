@@ -15,5 +15,4 @@ DC api.drupal.org filter
 
 This filter converts tags like [api:hook_menu] or [api:hook_menu Description] to
 links pointing to the corresponding API page.
-
-
+For a specific version use [api:hook_menu:7] or [api:hook_menu:7 Description].
